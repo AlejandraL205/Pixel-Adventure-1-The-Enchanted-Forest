@@ -5,8 +5,10 @@ using UnityEngine;
 public class Movimiento : MonoBehaviour
 {
     private Rigidbody2D rb;
-    public float speed = 5f;
+    public float speed = 3f; // Reducir velocidad para movimiento más lento
     public float jump = 8f;
+    public float movementSmoothTime = 0.1f; // Tiempo para suavizar el movimiento
+    private Vector2 currentVelocity = Vector2.zero;
     public Animator animator;
 
     private bool isFacingRight = true;
@@ -17,14 +19,28 @@ public class Movimiento : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
-        // Movimiento horizontal
+        // Movimiento horizontal con suavidad
         float move = Input.GetAxis("Horizontal"); // "Horizontal" para teclas A/D o flechas
-        rb.velocity = new Vector2(move * speed, rb.velocity.y);
+        Vector2 targetVelocity = new Vector2(move * speed, rb.velocity.y);
+        rb.velocity = Vector2.SmoothDamp(rb.velocity, targetVelocity, ref currentVelocity, movementSmoothTime);
 
-        // Animaciones de movimiento
-        animator.SetFloat("movimiento", Mathf.Abs(move));
+        // Actualización de animaciones
+        if (move != 0)
+        {
+            // Movimiento en horizontal
+            animator.SetFloat("movimiento", Mathf.Abs(move));
+            animator.SetBool("stay", false);
+            animator.SetBool("run", true);
+        }
+        else
+        {
+            // Personaje en reposo
+            animator.SetFloat("movimiento", 0);
+            animator.SetBool("stay", true);
+            animator.SetBool("run", false);
+        }
 
         if (move > 0 && !isFacingRight)
         {
@@ -34,7 +50,10 @@ public class Movimiento : MonoBehaviour
         {
             Flip();
         }
+    }
 
+    private void Update()
+    {
         // Salto
         if (Input.GetKeyDown(KeyCode.Space) && PlayerInGround.inGround)
         {
