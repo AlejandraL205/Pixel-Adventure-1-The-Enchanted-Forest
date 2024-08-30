@@ -7,7 +7,6 @@ public class Movimiento : MonoBehaviour
     private Rigidbody2D rb;
     public float speed = 5f;
     public float jump = 8f;
-    public int vidaCajita = 100;
     public Animator animator;
 
     private bool isFacingRight = true;
@@ -67,15 +66,7 @@ public class Movimiento : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("cajita"))
         {
-            vidaCajita -= 10;
-            Debug.Log("Vida cajita: " + vidaCajita);
-        }
-    }
-
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("cajita") && vidaCajita <= 0)
-        {
+            // Destruye la caja inmediatamente al tocarla
             Destroy(collision.gameObject);
         }
     }
